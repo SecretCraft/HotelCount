@@ -1,0 +1,4 @@
+name: HotelCount
+main: basic.HotelCount
+version: 0.1
+softdepend: [WorldGuard, SimpleRegionMarket]
