@@ -7,12 +7,8 @@ import java.util.logging.Logger;
 import org.bukkit.Bukkit;
 import org.bukkit.Server;
 import org.bukkit.entity.Player;
-import org.bukkit.event.Event;
-import org.bukkit.event.Listener;
 import org.bukkit.plugin.Plugin;
-import org.bukkit.plugin.PluginManager;
 import org.bukkit.plugin.java.JavaPlugin;
-import org.bukkit.scheduler.BukkitScheduler;
 
 // Referenced classes of package basic:
 //            BListener, config, SignManager
@@ -57,40 +53,43 @@ public class HotelCount extends JavaPlugin
     public void onEnable()
     {
     	
-    	 log = Logger.getLogger("Minecraft");
+    	log = Logger.getLogger("Minecraft");
         
-         error = false;
+        error = false;
     	
     	plugin = this;
         server = getServer();
         sman = new SignManager();
         log.info("-HotelCount-:Hotelcount has been enabled!");
-        agents = (new StringBuilder(String.valueOf(getDataFolder().getParent()))).append(File.separator).append("SimpleRegionMarket").append(File.separator).append("agents.yml").toString();
+        
+        // will result in something like "./Plugins/SimpleRegionManager/signs/rent.yml"
+        agents = (new StringBuilder(String.valueOf(getDataFolder().getParent()))).append(File.separator)
+                  .append("SimpleRegionMarket").append(File.separator).append("signs")
+                  .append(File.separator).append("rent.yml").toString();
+
+        // will result in something like "./Plugins/HotelCount/"
         signs = (new StringBuilder()).append(getDataFolder()).append(File.separator).toString();
+        
         config configuration = new config();
         configuration.load();
         
-        
+        // actually, we don't need the instance
         blockListener = new BListener();
-        // TODO
-        //server.getPluginManager().registerEvent(org.bukkit.event.Event.Type.SIGN_CHANGE, blockListener, org.bukkit.event.Event.Priority.Normal, this);
-        //server.getPluginManager().registerEvent(org.bukkit.event.Event.Type.BLOCK_BREAK, blockListener, org.bukkit.event.Event.Priority.Normal, this);
+        Bukkit.getServer().getPluginManager().registerEvents(blockListener, this);
         
-        
+        // update all [COUNTER] signs every 1200 ticks. this should happen every minute.
         server.getScheduler().scheduleSyncRepeatingTask(this, new Runnable() {
-
             public void run()
             {
                 HotelCount.getSM().updateAgents();
             }
 
-            final HotelCount this$0;
+            @SuppressWarnings("unused")
+			final HotelCount this$0;
             {
                 this$0 = HotelCount.this;
-                
             }
-        }
-, 20L, 1200L);
+        }, 20L, 1200L);
     }
 
     public void onDisable()
@@ -108,7 +107,7 @@ public class HotelCount extends JavaPlugin
     public static String signs = null;
     public static SignManager sman;
     Logger log;
-    private BListener blockListener;
+	private BListener blockListener;
     private boolean error;
 
 }

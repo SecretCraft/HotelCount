@@ -1,13 +1,8 @@
 package basic;
 
-import java.io.File;
-import java.util.Iterator;
-
 import org.bukkit.Bukkit;
 import org.bukkit.block.Block;
 import org.bukkit.block.Sign;
-import org.bukkit.configuration.ConfigurationSection;
-import org.bukkit.configuration.file.YamlConfiguration;
 import org.bukkit.entity.Player;
 import org.bukkit.event.EventHandler;
 import org.bukkit.event.Listener;
@@ -24,7 +19,6 @@ public class BListener implements Listener
     public BListener()
     {
     	plugin = HotelCount.getInstance();
-        room = "";
 		Bukkit.getServer().getPluginManager().registerEvents(this, plugin);
     }
 
@@ -70,93 +64,16 @@ public class BListener implements Listener
             }
             catch(Exception exception1) { }
             
-            int count[] = getRooms((new StringBuilder()).append(event.getLine(1)).toString(), low, high);
-            event.setLine(0, (new StringBuilder("Gesamt:")).append(count[0]).toString());
-            event.setLine(1, (new StringBuilder("Frei:")).append(count[2]).toString());
-            event.setLine(2, (new StringBuilder("Belegt:")).append(count[1]).toString());
+            int count[] = HotelCount.getSM().getRooms(event.getLine(1), low, high);
+            event.setLine(0, (new StringBuilder("Gesamt: ")).append(count[SignManager.ALL]).toString());
+            event.setLine(1, (new StringBuilder("Frei  : ")).append(count[SignManager.FREE]).toString());
+            event.setLine(2, (new StringBuilder("Belegt: ")).append(count[SignManager.TAKEN]).toString());
             
-            if(!room.equals(null))
-                event.setLine(3, room);
+            if(!HotelCount.getSM().freeRoom.isEmpty())
+                event.setLine(3, HotelCount.getSM().freeRoom);
             else
-                event.setLine(3, "Kein freies Zimmer");
-            room = "";
+                event.setLine(3, "No free room"); // auf deutsch passt es nicht aufs schild!
             HotelCount.getSM().addAgent(event.getBlock().getLocation(), region, low, high);
         }
     }
-
-    public int[] getRooms(String name, int low, int high)
-    {
-        int i[] = new int[3];
-        File ag = new File(HotelCount.agents);
-        YamlConfiguration confighandle = YamlConfiguration.loadConfiguration(ag);
-        for(Iterator iterator = confighandle.getKeys(false).iterator(); iterator.hasNext();)
-        {
-            String world = (String)iterator.next();
-            ConfigurationSection path = confighandle.getConfigurationSection(world);
-            for(Iterator iterator1 = path.getKeys(false).iterator(); iterator1.hasNext();)
-            {
-                String region = (String)iterator1.next();
-                if(region.replaceAll("\\d*$", "").equalsIgnoreCase(name))
-                    if(high > 0)
-                    {
-                        if(low <= Integer.parseInt(region.replaceAll("[^\\d]", "")) && high >= Integer.parseInt(region.replaceAll("[^\\d]", "")))
-                        {
-                            path = confighandle.getConfigurationSection(world).getConfigurationSection(region);
-                            for(Iterator iterator2 = path.getKeys(false).iterator(); iterator2.hasNext();)
-                            {
-                                String signnr = (String)iterator2.next();
-                                path = confighandle.getConfigurationSection(world).getConfigurationSection(region).getConfigurationSection(signnr);
-                                if(path.isSet("Mode") && path.getInt("Mode") == 1)
-                                {
-                                    i[0]++;
-                                    if(path.isSet("RentBy"))
-                                    {
-                                        i[1]++;
-                                    } else
-                                    {
-                                        i[2]++;
-                                        if(i[2] == 1)
-                                            room = region;
-                                        else
-                                        if(Integer.parseInt(region.replaceAll("[^0-9]", "")) < Integer.parseInt(room.replaceAll("[^0-9]", "")))
-                                            room = region;
-                                    }
-                                }
-                            }
-
-                        }
-                    } else
-                    {
-                        path = confighandle.getConfigurationSection(world).getConfigurationSection(region);
-                        for(Iterator iterator3 = path.getKeys(false).iterator(); iterator3.hasNext();)
-                        {
-                            String signnr = (String)iterator3.next();
-                            path = confighandle.getConfigurationSection(world).getConfigurationSection(region).getConfigurationSection(signnr);
-                            if(path.isSet("Mode") && path.getInt("Mode") == 1)
-                            {
-                                i[0]++;
-                                if(path.isSet("RentBy"))
-                                {
-                                    i[1]++;
-                                } else
-                                {
-                                    i[2]++;
-                                    if(i[2] == 1)
-                                        room = region;
-                                    else
-                                    if(Integer.parseInt(region.replaceAll("[^0-9]", "")) < Integer.parseInt(room.replaceAll("[^0-9]", "")))
-                                        room = region;
-                                }
-                            }
-                        }
-
-                    }
-            }
-
-        }
-
-        return i;
-    }
-
-    private String room;
 }
