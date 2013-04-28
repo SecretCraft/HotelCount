@@ -45,7 +45,7 @@ public class SignManager
         for(Iterator<SingleSign> iterator = allSigns.iterator(); iterator.hasNext(); agentsign.update())
         {
             SingleSign obj = iterator.next();
-            int rooms[] = getRooms(obj.getRegionID(), obj.getLow(), obj.getHigh());
+            int rooms[] = getRooms(obj.getRegionID(), obj.getLow(), obj.getHigh(), obj.getWorld());
             
             if ( obj.getLocation().getBlock().getState() instanceof Sign ) {
             	agentsign = (Sign)obj.getLocation().getBlock().getState();     
@@ -63,7 +63,7 @@ public class SignManager
         }
     }
 
-    public int[] getRooms(String name, int low, int high)
+    public int[] getRooms(String name, int low, int high, String world)
     {
         freeRoom = "";
         
@@ -76,38 +76,35 @@ public class SignManager
         File ag = new File(HotelCount.agents);
         YamlConfiguration confighandle = YamlConfiguration.loadConfiguration(ag);
         
-        for(Iterator<String> iterator = confighandle.getKeys(false).iterator(); iterator.hasNext();) {
-            String world = iterator.next();
-            ConfigurationSection path = confighandle.getConfigurationSection(world);
+        ConfigurationSection path = confighandle.getConfigurationSection(world);
+        
+        for(Iterator<String> iterator1 = path.getKeys(false).iterator(); iterator1.hasNext();) {
+            String region = iterator1.next();
             
-            for(Iterator<String> iterator1 = path.getKeys(false).iterator(); iterator1.hasNext();) {
-                String region = iterator1.next();
-                
-                if(region.replaceAll("\\d*$", "").equalsIgnoreCase(name)) {
-                    if((low  <= Integer.parseInt(region.replaceAll("[^\\d]", "")) &&
-                    	high >= Integer.parseInt(region.replaceAll("[^\\d]", ""))) ||
-                        high <= 0) {
-                    	
-                    	path = confighandle.getConfigurationSection(world).getConfigurationSection(region);
-                        i[ALL]++; // it is actually a hotel room, so increase the counter
-                        
-                        if(!path.isConfigurationSection("signs")) {
-                        	i[TAKEN]++; // if there is no sign it is considered taken
-                        }
-                        else if(path.getBoolean("taken") == true) {
-                        	i[TAKEN]++;
-                        }
-                        else {
-                        	i[FREE]++;
-                            if(i[FREE] == 1)
-                            	freeRoom = region;
-                            else if(Integer.parseInt(region.replaceAll("[^0-9]", "")) < Integer.parseInt(freeRoom.replaceAll("[^0-9]", "")))
-                            	freeRoom = region;
-                        }
+            if(region.replaceAll("\\d*$", "").equalsIgnoreCase(name)) {
+                if((low  <= Integer.parseInt(region.replaceAll("[^\\d]", "")) &&
+                	high >= Integer.parseInt(region.replaceAll("[^\\d]", ""))) ||
+                    high <= 0) {
+                	
+                	path = confighandle.getConfigurationSection(world).getConfigurationSection(region);
+                    i[ALL]++; // it is actually a hotel room, so increase the counter
+                    
+                    if(!path.isConfigurationSection("signs")) {
+                    	i[TAKEN]++; // if there is no sign it is considered taken
+                    }
+                    else if(path.getBoolean("taken") == true) {
+                    	i[TAKEN]++;
+                    }
+                    else {
+                    	i[FREE]++;
+                        if(i[FREE] == 1)
+                        	freeRoom = region;
+                        else if(Integer.parseInt(region.replaceAll("[^0-9]", "")) < Integer.parseInt(freeRoom.replaceAll("[^0-9]", "")))
+                        	freeRoom = region;
                     }
                 }
             }
-        }
+    }
         return i;
     }
 

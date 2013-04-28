@@ -22,13 +22,13 @@ public class config
     public void load()
     {
         YamlConfiguration confighandle = YamlConfiguration.loadConfiguration(cfgSigns);
-        for(Iterator iterator = confighandle.getKeys(false).iterator(); iterator.hasNext();)
+        for(Iterator<String> iterator = confighandle.getKeys(false).iterator(); iterator.hasNext();)
         {
-            String world = (String)iterator.next();
+            String world = iterator.next();
             ConfigurationSection path = confighandle.getConfigurationSection(world);
-            for(Iterator iterator1 = path.getKeys(false).iterator(); iterator1.hasNext();)
+            for(Iterator<String> iterator1 = path.getKeys(false).iterator(); iterator1.hasNext();)
             {
-                String signnr = (String)iterator1.next();
+                String signnr = iterator1.next();
                 path = confighandle.getConfigurationSection(world).getConfigurationSection(signnr);
                 if(path != null)
                 {
@@ -48,9 +48,9 @@ public class config
     {
         YamlConfiguration confighandle = new YamlConfiguration();
         int i = 0;
-        for(Iterator iterator = HotelCount.getSM().getAllSigns().iterator(); iterator.hasNext();)
+        for(Iterator<SingleSign> iterator = HotelCount.getSM().getAllSigns().iterator(); iterator.hasNext();)
         {
-            SingleSign obj = (SingleSign)iterator.next();
+            SingleSign obj = iterator.next();
             Location loc = obj.getLocation();
             String path = (new StringBuilder(String.valueOf(loc.getWorld().getName()))).append(".").append(Integer.toString(i)).toString();
             confighandle.set((new StringBuilder(String.valueOf(path))).append(".RegionID").toString(), obj.getRegionID());

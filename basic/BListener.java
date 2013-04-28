@@ -64,7 +64,7 @@ public class BListener implements Listener
             }
             catch(Exception exception1) { }
             
-            int count[] = HotelCount.getSM().getRooms(event.getLine(1), low, high);
+            int count[] = HotelCount.getSM().getRooms(event.getLine(1), low, high, event.getBlock().getWorld().getName());
             event.setLine(0, (new StringBuilder("Gesamt: ")).append(count[SignManager.ALL]).toString());
             event.setLine(1, (new StringBuilder("Frei  : ")).append(count[SignManager.FREE]).toString());
             event.setLine(2, (new StringBuilder("Belegt: ")).append(count[SignManager.TAKEN]).toString());
